@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 
 public class movement : MonoBehaviour
 {
-    public float moveSpeed = 5f; 
+    Stats stats; 
     public float changeInterval = 2f;
     public float followRadius = 5f;
     public float followOffSet = 1.5f;
@@ -19,6 +19,12 @@ public class movement : MonoBehaviour
     void Start()
     {
         GetRandomDirection();
+        stats = GetComponent<Stats>();
+        
+        if (stats == null)
+        {
+            Debug.LogError("Stats script not found. Make sure it's on the same GameObject or a parent GameObject.");
+        }
     }
 
     void Update()
@@ -34,9 +40,10 @@ public class movement : MonoBehaviour
         
     }
 
+   
     void MoveRandomly()
     {
-        transform.Translate(randomDirection * moveSpeed * Time.deltaTime);
+        transform.Translate(randomDirection * stats.Speed * Time.deltaTime);
 
         timer -= Time.deltaTime;
         if (timer <= 0f)
@@ -85,7 +92,7 @@ public class movement : MonoBehaviour
             
             Vector3 targetPosition = leader.position + directionToLeader * (followOffSet + formationOffSet.magnitude * 1.5f);
             
-            transform.Translate(directionToLeader * moveSpeed * Time.deltaTime);
+            transform.Translate(directionToLeader * stats.Speed * Time.deltaTime);
             
             transform.position = Vector3.Slerp(transform.position, targetPosition, Time.deltaTime);
 
