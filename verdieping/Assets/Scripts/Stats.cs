@@ -22,10 +22,9 @@ public class Stats : MonoBehaviour
     public float HPDexterity;
     public float ManaIntelegians;
 
-    private void Start()
+    void Start()
     {
-        CurrentHP = HPMax;
-        CurrentMana = MaxMana;
+        
     }
 
     void Update()
@@ -34,5 +33,7 @@ public class Stats : MonoBehaviour
         MaxMana = Intellegians * ManaIntelegians * 5 / 1;
         HPMax = Mathf.Round(HPMax);
         MaxMana = Mathf.Round(MaxMana);
+        CurrentHP = HPMax;
+        CurrentMana = MaxMana;
     }
 }

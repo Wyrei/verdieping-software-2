@@ -92,7 +92,7 @@ public class movement : MonoBehaviour
             
             Vector3 targetPosition = leader.position + directionToLeader * (followOffSet + formationOffSet.magnitude * 1.5f);
             
-            transform.Translate(directionToLeader * stats.Speed * Time.deltaTime);
+            transform.Translate(directionToLeader * stats.Speed * Time.deltaTime / 20);
             
             transform.position = Vector3.Slerp(transform.position, targetPosition, Time.deltaTime);
 
