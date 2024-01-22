@@ -13,7 +13,8 @@ public class Stats : MonoBehaviour
     public float MaxMana;
     public float CurrentMana;
 
-    public int Attack;
+    public int Damage;
+    public int DamageCalc;
     public float Speed;
     public int Dexterity;
     public int Wisdom;
@@ -31,6 +32,7 @@ public class Stats : MonoBehaviour
     {
         HPMax = Dexterity * HPDexterity * 2 / 1;
         MaxMana = Intellegians * ManaIntelegians * 5 / 1;
+        Damage = DamageCalc * 3;
         HPMax = Mathf.Round(HPMax);
         MaxMana = Mathf.Round(MaxMana);
         CurrentHP = HPMax;

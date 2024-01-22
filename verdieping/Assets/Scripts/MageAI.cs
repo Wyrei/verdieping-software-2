@@ -2,8 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class SwordManAI : MonoBehaviour
+public class MageAI : MonoBehaviour
 {
     [SerializeField] private List<Transform> Enemies;
 
@@ -23,6 +24,7 @@ public class SwordManAI : MonoBehaviour
     
     private Transform closestEnemy;
     private Transform enemy;
+    private Transform enemyTransform;
 
     void Start()
     {
@@ -58,8 +60,13 @@ public class SwordManAI : MonoBehaviour
                 {
                     Enemies.Add(collider.transform);
                     enemy = Enemies[0];
+                    enemyTransform = enemy;
                 }
                 getClosestEnemy();
+            }
+            else
+            {
+                Enemies.Clear();
             }
         }
     }
@@ -90,6 +97,7 @@ public class SwordManAI : MonoBehaviour
         {
             transform.position = Vector3.MoveTowards(transform.position, closestEnemy.position, stats.Speed * Time.deltaTime);
         }
+        
         Vector3 directionToEnemy = (enemy.position - transform.position).normalized;
         Quaternion rotationToEnemy = Quaternion.LookRotation(directionToEnemy);
         transform.rotation = Quaternion.Slerp(transform.rotation, rotationToEnemy, rotationSpeed * Time.deltaTime);
@@ -103,10 +111,17 @@ public class SwordManAI : MonoBehaviour
             Vector3 SpawnPos = transform.position + 2 * transform.forward;
         
             GameObject a = Instantiate(AttackPrefab, SpawnPos, Quaternion.identity);
-            
+
+            if (enemyTransform)
+            {
+                Vector3 directionToEnemy = (enemyTransform.position - a.transform.position).normalized;
+                a.GetComponent<Rigidbody>().velocity = directionToEnemy * stats.Speed;
+            }
             Timer = ResetTimer;
         }
     }
+    
+    
     
     private void OnDrawGizmos()
     {
