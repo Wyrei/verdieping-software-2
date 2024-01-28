@@ -35,7 +35,10 @@ public class Stats : MonoBehaviour
         Damage = DamageCalc * 3;
         HPMax = Mathf.Round(HPMax);
         MaxMana = Mathf.Round(MaxMana);
-        CurrentHP = HPMax;
-        CurrentMana = MaxMana;
+    }
+
+    public void Healing(float healingAmount)
+    {
+        CurrentHP += healingAmount;
     }
 }

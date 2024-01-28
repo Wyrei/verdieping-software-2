@@ -28,7 +28,6 @@ public class ArcherAI : MonoBehaviour
     
     private Transform closestEnemy;
     private Transform enemy;
-    private Transform enemyTransform;
 
     void Start()
     {
@@ -65,7 +64,6 @@ public class ArcherAI : MonoBehaviour
                 {
                     Enemies.Add(collider.transform);
                     enemy = Enemies[0];
-                    enemyTransform = enemy;
                 }
                 getClosestEnemy();
             }
@@ -127,9 +125,9 @@ public class ArcherAI : MonoBehaviour
             
             a.transform.parent = transform;
 
-            if (enemyTransform)
+            if (enemy)
             {
-                Vector3 directionToEnemy = (enemyTransform.position - a.transform.position).normalized;
+                Vector3 directionToEnemy = (enemy.position - a.transform.position).normalized;
                 a.GetComponent<Rigidbody>().velocity = directionToEnemy * stats.Speed;
             }
             Timer = ResetTimer;
