@@ -10,6 +10,8 @@ public class ArcherAI : MonoBehaviour
 
     [Space]
     Stats stats;
+    Movement _movement;
+    
     [SerializeField] private float rotationSpeed;
     [SerializeField] private int Arrow;
     
@@ -25,6 +27,7 @@ public class ArcherAI : MonoBehaviour
     
     [SerializeField] private float range;
     [SerializeField] private GameObject AttackPrefab;
+    public Animator animator;
     
     private Transform closestEnemy;
     private Transform enemy;
@@ -32,6 +35,7 @@ public class ArcherAI : MonoBehaviour
     void Start()
     {
         stats = GetComponent<Stats>();
+        _movement = GetComponent<Movement>();
         
         if (stats == null)
         {
@@ -41,15 +45,11 @@ public class ArcherAI : MonoBehaviour
 
     void Update()
     {
-        /*if (stats.CurrentHP < stats.HPMax / 2)
-        {
-            
-        }
-        else
-        {
-            enemieinrange(); 
-        }*/
         enemieinrange();
+        if(enemy == null)
+        {
+            _movement.manageMovement();
+        }
         
     }
     void enemieinrange()
@@ -88,6 +88,7 @@ public class ArcherAI : MonoBehaviour
                 moveTowardsClosestEnemy();
             }
         }
+        
     }
     
     void moveTowardsClosestEnemy()
@@ -105,10 +106,10 @@ public class ArcherAI : MonoBehaviour
         else
         {
             float effectiveSpeed = Mathf.Min(stats.Speed, distanceToEnemy / 2f);
-            
+            animator.SetTrigger("walking");
             transform.position = Vector3.MoveTowards(transform.position, closestEnemy.position, effectiveSpeed * Time.deltaTime);
         }
-        
+        animator.SetTrigger("walking");
         Vector3 directionToEnemy = (enemy.position - transform.position).normalized;
         Quaternion rotationToEnemy = Quaternion.LookRotation(directionToEnemy);
         transform.rotation = Quaternion.Slerp(transform.rotation, rotationToEnemy, rotationSpeed * Time.deltaTime);

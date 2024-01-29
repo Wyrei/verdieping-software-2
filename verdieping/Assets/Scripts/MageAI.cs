@@ -6,11 +6,14 @@ using UnityEngine.Serialization;
 
 public class MageAI : MonoBehaviour
 {
-    [SerializeField] private List<Transform> Enemies;
+   [SerializeField] private List<Transform> Enemies;
 
     [Space]
     Stats stats;
+    Movement _movement;
+    
     [SerializeField] private float rotationSpeed;
+
 
     [Space]
     [SerializeField] private float Timer;
@@ -19,16 +22,17 @@ public class MageAI : MonoBehaviour
     
     [Space]
     [SerializeField] private float offset;
+    
     [SerializeField] private float range;
     [SerializeField] private GameObject AttackPrefab;
     
     private Transform closestEnemy;
     private Transform enemy;
-    private Transform enemyTransform;
 
     void Start()
     {
         stats = GetComponent<Stats>();
+        _movement = GetComponent<Movement>();
         
         if (stats == null)
         {
@@ -38,15 +42,11 @@ public class MageAI : MonoBehaviour
 
     void Update()
     {
-        if (stats.CurrentHP < stats.HPMax / 2)
+        enemieinrange();
+        if(enemy == null)
         {
-            
+            _movement.manageMovement();
         }
-        else
-        {
-            enemieinrange(); 
-        }
-        
     }
     void enemieinrange()
     {
@@ -60,7 +60,6 @@ public class MageAI : MonoBehaviour
                 {
                     Enemies.Add(collider.transform);
                     enemy = Enemies[0];
-                    enemyTransform = enemy;
                 }
                 getClosestEnemy();
             }
@@ -68,7 +67,9 @@ public class MageAI : MonoBehaviour
             {
                 Enemies.Clear();
             }
+            
         }
+        
     }
     void getClosestEnemy()
     {
@@ -89,13 +90,17 @@ public class MageAI : MonoBehaviour
     
     void moveTowardsClosestEnemy()
     {
-        if (Vector3.Distance(transform.position,closestEnemy.position) < offset)
+        float distanceToEnemy = Vector3.Distance(transform.position, closestEnemy.position);
+
+        if (Vector3.Distance(transform.position, closestEnemy.position) < offset)
         {
-            stopmoving();
+            rangeAttack();
         }
         else
         {
-            transform.position = Vector3.MoveTowards(transform.position, closestEnemy.position, stats.Speed * Time.deltaTime);
+            float effectiveSpeed = Mathf.Min(stats.Speed, distanceToEnemy / 2f);
+            
+            transform.position = Vector3.MoveTowards(transform.position, closestEnemy.position, effectiveSpeed * Time.deltaTime);
         }
         
         Vector3 directionToEnemy = (enemy.position - transform.position).normalized;
@@ -103,26 +108,25 @@ public class MageAI : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, rotationToEnemy, rotationSpeed * Time.deltaTime);
     }
 
-    void stopmoving()
+    void rangeAttack()
     {
         Timer -= Time.deltaTime;
         if (Timer <= nullPoint)
         {
             Vector3 SpawnPos = transform.position + 2 * transform.forward;
-        
-            GameObject a = Instantiate(AttackPrefab, SpawnPos, Quaternion.identity);
 
-            if (enemyTransform)
+            GameObject a = Instantiate(AttackPrefab, SpawnPos, Quaternion.identity);
+            
+            a.transform.parent = transform;
+
+            if (enemy)
             {
-                Vector3 directionToEnemy = (enemyTransform.position - a.transform.position).normalized;
+                Vector3 directionToEnemy = (enemy.position - a.transform.position).normalized;
                 a.GetComponent<Rigidbody>().velocity = directionToEnemy * stats.Speed;
             }
             Timer = ResetTimer;
         }
     }
-    
-    
-    
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.black;

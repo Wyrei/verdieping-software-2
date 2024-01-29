@@ -38,6 +38,10 @@ public class PrefabAttack : MonoBehaviour
             }
             Destroy(gameObject);
         }
+        else if (collision.collider.CompareTag("Player"))
+        {
+            
+        }
     }
 }
 

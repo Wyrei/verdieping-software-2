@@ -1,9 +1,5 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class HealerAI : MonoBehaviour
 {
@@ -12,6 +8,7 @@ public class HealerAI : MonoBehaviour
    [SerializeField] private float rotationSpeed;
    [SerializeField] private float offset;
    Stats stats;
+   Movement _movement;
    
    [Space]
    [SerializeField] private float Timer;
@@ -19,14 +16,15 @@ public class HealerAI : MonoBehaviour
    private float nullPoint;
    
    [Space]
-   private Transform ally;
-   private Transform lowestHPAlly;
+   public Transform ally;
+   public Transform lowestHPAlly;
 
    [SerializeField] private float range;
    
    void Start()
    {
       stats = GetComponent<Stats>();
+      _movement = GetComponent<Movement>();
         
       if (stats == null)
       {
@@ -37,6 +35,12 @@ public class HealerAI : MonoBehaviour
    {
       Timer -= Time.deltaTime;
       allyInRange();
+      Stats allyStats = lowestHPAlly.GetComponent<Stats>();
+      if (allyStats.CurrentHP > 0.99f * allyStats.HPMax)
+      {
+         _movement.manageMovement();
+      }
+      
    }
 
    void allyInRange()
@@ -64,7 +68,6 @@ public class HealerAI : MonoBehaviour
    void getClosestAlly()
    {
       float lowestHP = Mathf.Infinity;
-      Transform newLowestHPAlly = null;
 
       foreach (Transform allyTransform in Ally)
       {
@@ -72,16 +75,11 @@ public class HealerAI : MonoBehaviour
          if (allyStats != null && allyStats.CurrentHP < lowestHP)
          {
             lowestHP = allyStats.CurrentHP;
-            newLowestHPAlly = allyTransform;
+            lowestHPAlly = allyTransform;
+            moveTowardsAlly();
          }
       }
-
-      if (newLowestHPAlly != null && newLowestHPAlly != lowestHPAlly)
-      {
-         Debug.Log("hello");
-         lowestHPAlly = newLowestHPAlly;
-         moveTowardsAlly();
-      }
+      
    }
 
    void moveTowardsAlly()
@@ -92,24 +90,22 @@ public class HealerAI : MonoBehaviour
 
          if (DistanceToAlly < range && lowestHPAlly.GetComponent<Stats>().CurrentHP < lowestHPAlly.GetComponent<Stats>().HPMax)
          {
-            // If the healer is close enough and not at full health, heal the ally
-            if (DistanceToAlly < offset && stats.CurrentHP < 0.99f * stats.HPMax)
+            Stats allyStats = lowestHPAlly.GetComponent<Stats>();
+            if (DistanceToAlly < offset && allyStats.CurrentHP < 0.99f * allyStats.HPMax)
             {
-               HealAlly(lowestHPAlly.GetComponent<Stats>());
-               Debug.Log("Healing");
+               HealAlly(allyStats);
             }
             else
             {
-               Debug.Log("Moving towards ally");
-               // Move towards the ally
                float effectiveSpeed = Mathf.Min(stats.Speed, DistanceToAlly);
-               Vector3 directionToAlly = (lowestHPAlly.position - transform.position).normalized;
-               transform.position += directionToAlly * effectiveSpeed * Time.deltaTime;
-
-               // Rotate towards the ally
-               Quaternion rotationToAlly = Quaternion.LookRotation(directionToAlly);
-               transform.rotation = Quaternion.Slerp(transform.rotation, rotationToAlly, rotationSpeed * Time.deltaTime);
+               transform.position = Vector3.MoveTowards(transform.position,  lowestHPAlly.position, effectiveSpeed * Time.deltaTime);
             }
+
+            Vector3 directionToAlly = (lowestHPAlly.position - transform.position).normalized;
+            
+            Quaternion rotationToAlly = Quaternion.LookRotation(directionToAlly);
+            transform.rotation = Quaternion.Slerp(transform.rotation, rotationToAlly, rotationSpeed * Time.deltaTime);
+            
          }
       }
    }
@@ -124,10 +120,6 @@ public class HealerAI : MonoBehaviour
             allyStats.Healing(healingAmount);
             Timer = ResetTimer;
          }
-      }
-      else
-      {
-         getClosestAlly();
       }
    }
    private void OnDrawGizmos()

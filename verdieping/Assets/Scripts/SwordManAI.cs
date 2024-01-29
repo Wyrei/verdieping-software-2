@@ -9,6 +9,8 @@ public class SwordManAI : MonoBehaviour
 
     [Space]
     Stats stats;
+    Movement _movement;
+    
     [SerializeField] private float rotationSpeed;
 
     [Space]
@@ -27,6 +29,7 @@ public class SwordManAI : MonoBehaviour
     void Start()
     {
         stats = GetComponent<Stats>();
+        _movement = GetComponent<Movement>();
         
         if (stats == null)
         {
@@ -36,15 +39,11 @@ public class SwordManAI : MonoBehaviour
 
     void Update()
     {
-        if (stats.CurrentHP < stats.HPMax / 2)
+        enemieinrange();
+        if(enemy == null)
         {
-            
+            _movement.manageMovement();
         }
-        else
-        {
-            enemieinrange(); 
-        }
-        
     }
     void enemieinrange()
     {
@@ -60,6 +59,10 @@ public class SwordManAI : MonoBehaviour
                     enemy = Enemies[0];
                 }
                 getClosestEnemy();
+            }
+            else
+            {
+                Enemies.Clear();
             }
         }
     }
@@ -82,28 +85,35 @@ public class SwordManAI : MonoBehaviour
     
     void moveTowardsClosestEnemy()
     {
+        float distanceToEnemy = Vector3.Distance(transform.position, closestEnemy.position);
+        
         if (Vector3.Distance(transform.position,closestEnemy.position) < offset)
         {
-            stopmoving();
+            MeleeAttack();
         }
         else
         {
-            transform.position = Vector3.MoveTowards(transform.position, closestEnemy.position, stats.Speed * Time.deltaTime);
+            float effectiveSpeed = Mathf.Min(stats.Speed, distanceToEnemy / 2f);
+            
+            transform.position = Vector3.MoveTowards(transform.position, closestEnemy.position, effectiveSpeed * Time.deltaTime);
         }
+        
         Vector3 directionToEnemy = (enemy.position - transform.position).normalized;
         Quaternion rotationToEnemy = Quaternion.LookRotation(directionToEnemy);
         transform.rotation = Quaternion.Slerp(transform.rotation, rotationToEnemy, rotationSpeed * Time.deltaTime);
     }
 
-    void stopmoving()
+    void MeleeAttack()
     {
         Timer -= Time.deltaTime;
         if (Timer <= nullPoint)
         {
             Vector3 SpawnPos = transform.position + 2 * transform.forward;
-        
+
             GameObject a = Instantiate(AttackPrefab, SpawnPos, Quaternion.identity);
             
+            a.transform.parent = transform;
+
             Timer = ResetTimer;
         }
     }
