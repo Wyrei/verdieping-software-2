@@ -22,6 +22,7 @@ public class SwordManAI : MonoBehaviour
     [SerializeField] private float offset;
     [SerializeField] private float range;
     [SerializeField] private GameObject AttackPrefab;
+    [SerializeField] private GameObject decoyPrefab;
     
     private Transform closestEnemy;
     private Transform enemy;
@@ -110,11 +111,12 @@ public class SwordManAI : MonoBehaviour
         {
             Vector3 SpawnPos = transform.position + 2 * transform.forward;
 
-            GameObject a = Instantiate(AttackPrefab, SpawnPos, Quaternion.identity);
-            
-            a.transform.parent = transform;
+            Instantiate(decoyPrefab, SpawnPos, Quaternion.identity);
 
             Timer = ResetTimer;
+            
+            GameObject b = Instantiate(AttackPrefab, enemy.position, Quaternion.identity);
+            b.transform.parent = transform;
         }
     }
     

@@ -12,7 +12,6 @@ public class Movement : MonoBehaviour
     private float timer;
     private Vector3 randomDirection;
     private Transform leader;
-    public Animator animator;
 
     void Start()
     {
@@ -49,8 +48,7 @@ public class Movement : MonoBehaviour
         
         Quaternion targetRotation = Quaternion.LookRotation(randomDirection);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.deltaTime * RotationSpeed);
-
-        animator.SetTrigger("passivewalking");
+        
         timer -= Time.deltaTime;
         if (timer <= 0f)
         {

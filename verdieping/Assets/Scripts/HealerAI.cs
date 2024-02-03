@@ -33,14 +33,28 @@ public class HealerAI : MonoBehaviour
    }
    private void Update()
    {
+      bool allEnemiesDead = CheckAllEnemiesDead();
       Timer -= Time.deltaTime;
       allyInRange();
-      Stats allyStats = lowestHPAlly.GetComponent<Stats>();
-      if (allyStats.CurrentHP > 0.99f * allyStats.HPMax)
+      CheckAllEnemiesDead();
+      if (allEnemiesDead)
       {
          _movement.manageMovement();
       }
       
+   }
+
+   bool CheckAllEnemiesDead()
+   {
+      Collider[] colliders = Physics.OverlapSphere(transform.position, range);
+      foreach (Collider col in colliders)
+      {
+         if (col.CompareTag("Enemy"))
+         {
+            return false;
+         }
+      }
+      return true;
    }
 
    void allyInRange()

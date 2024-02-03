@@ -27,7 +27,8 @@ public class ArcherAI : MonoBehaviour
     
     [SerializeField] private float range;
     [SerializeField] private GameObject AttackPrefab;
-    public Animator animator;
+    [SerializeField] private GameObject decoyPrefab;
+    
     
     private Transform closestEnemy;
     private Transform enemy;
@@ -106,10 +107,8 @@ public class ArcherAI : MonoBehaviour
         else
         {
             float effectiveSpeed = Mathf.Min(stats.Speed, distanceToEnemy / 2f);
-            animator.SetTrigger("walking");
             transform.position = Vector3.MoveTowards(transform.position, closestEnemy.position, effectiveSpeed * Time.deltaTime);
         }
-        animator.SetTrigger("walking");
         Vector3 directionToEnemy = (enemy.position - transform.position).normalized;
         Quaternion rotationToEnemy = Quaternion.LookRotation(directionToEnemy);
         transform.rotation = Quaternion.Slerp(transform.rotation, rotationToEnemy, rotationSpeed * Time.deltaTime);
@@ -122,17 +121,20 @@ public class ArcherAI : MonoBehaviour
         {
             Vector3 SpawnPos = transform.position + 2 * transform.forward;
 
-            GameObject a = Instantiate(AttackPrefab, SpawnPos, Quaternion.identity);
+            GameObject A = Instantiate(decoyPrefab, SpawnPos, Quaternion.identity);
             
-            a.transform.parent = transform;
-
-            if (enemy)
-            {
-                Vector3 directionToEnemy = (enemy.position - a.transform.position).normalized;
-                a.GetComponent<Rigidbody>().velocity = directionToEnemy * stats.Speed;
-            }
             Timer = ResetTimer;
             Arrow -= 1;
+            
+            GameObject b = Instantiate(AttackPrefab, enemy.position, Quaternion.identity);
+            
+            if (enemy)
+            {
+                float speed = 10f;
+                Vector3 directionToEnemy = (enemy.position - A.transform.position).normalized;
+                A.GetComponent<Rigidbody>().velocity = directionToEnemy * speed;
+            }
+            b.transform.parent = transform;
         }
     }
 
@@ -143,11 +145,12 @@ public class ArcherAI : MonoBehaviour
         {
             Vector3 SpawnPos = transform.position + 2 * transform.forward;
 
-            GameObject a = Instantiate(AttackPrefab, SpawnPos, Quaternion.identity);
+            Instantiate(decoyPrefab, SpawnPos, Quaternion.identity);
             
-            a.transform.parent = transform;
-
             Timer = ResetTimer;
+            
+            GameObject b = Instantiate(AttackPrefab, enemy.position, Quaternion.identity);
+            b.transform.parent = transform;
         }
     }
     

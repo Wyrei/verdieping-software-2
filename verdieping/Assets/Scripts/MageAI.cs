@@ -15,7 +15,8 @@ public class MageAI : MonoBehaviour
     [SerializeField] private float rotationSpeed;
 
 
-    [Space]
+    [Space] 
+    [SerializeField] private float specialTimer;
     [SerializeField] private float Timer;
     [SerializeField] private float ResetTimer;
     private float nullPoint;
@@ -25,6 +26,8 @@ public class MageAI : MonoBehaviour
     
     [SerializeField] private float range;
     [SerializeField] private GameObject AttackPrefab;
+    [SerializeField] private GameObject decoyPrefab;
+    
     
     private Transform closestEnemy;
     private Transform enemy;
@@ -42,13 +45,13 @@ public class MageAI : MonoBehaviour
 
     void Update()
     {
-        enemieinrange();
+        enemieInRange();
         if(enemy == null)
         {
             _movement.manageMovement();
         }
     }
-    void enemieinrange()
+    void enemieInRange()
     {
         Collider[] colliders = Physics.OverlapSphere(transform.position, range);
 
@@ -115,16 +118,23 @@ public class MageAI : MonoBehaviour
         {
             Vector3 SpawnPos = transform.position + 2 * transform.forward;
 
-            GameObject a = Instantiate(AttackPrefab, SpawnPos, Quaternion.identity);
-            
-            a.transform.parent = transform;
+            GameObject A = Instantiate(decoyPrefab, SpawnPos, Quaternion.identity);
 
+            Timer = ResetTimer;
+
+            GameObject b = Instantiate(AttackPrefab, enemy.position, Quaternion.identity);
+            b.transform.parent = transform;
             if (enemy)
             {
-                Vector3 directionToEnemy = (enemy.position - a.transform.position).normalized;
-                a.GetComponent<Rigidbody>().velocity = directionToEnemy * stats.Speed;
+                float speed = 10f;
+                Vector3 directionToEnemy = (enemy.position - A.transform.position).normalized;
+                A.GetComponent<Rigidbody>().velocity = directionToEnemy * speed;
             }
-            Timer = ResetTimer;
+        }
+
+        if (specialTimer <= nullPoint)
+        {
+            
         }
     }
     private void OnDrawGizmos()
